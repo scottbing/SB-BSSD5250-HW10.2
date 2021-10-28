@@ -38,26 +38,29 @@ class VideoViewFragment : Fragment() {
                     return true
                 }
             })
-            setOnPreparedListener(object:MediaPlayer.OnPreparedListener){
+            setOnPreparedListener(object:MediaPlayer.OnPreparedListener{
                 override fun onPrepared(p0: MediaPlayer?) {
                     videosMP = p0
                 }
             })
         }
-
         return videoView
-
     }
 
     private inner class VideoGestureListener : GestureDetector.SimpleOnGestureListener() {
 
         override fun onDoubleTap(e: MotionEvent?): Boolean {
+            videosMP?.setVolume(0F,0F)
             if(videoView.isPlaying){
                 videoView.pause()
             }else{
                 videoView.start()
             }
             return super.onDoubleTap(e)
+        }
+
+        override fun onLongPress(e: MotionEvent?) {
+            super.onLongPress(e)
         }
 
         override fun onDown(e: MotionEvent?): Boolean {
