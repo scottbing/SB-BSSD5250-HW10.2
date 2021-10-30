@@ -96,16 +96,20 @@ class VideoViewFragment : Fragment() {
                 videoView.seekTo(pos)
                 return true
             }
-            /*//taken from: https://stackoverflow.com/questions/4098198/adding-fling-gesture-to-an-image-view-android
-            // Horizontal Swipe
-            if(e1.x - e2.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                pos -= amt
-                return false // Right to left
-            }  else if (e2.x - e1.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+
+            // horizontal swipe
+            if(velocityX > 0) {
                 pos += amt
-                return false // Left to right
+                if(pos < 0) {
+                    pos = 0
+                } else {
+                    pos -= amt
+                    Log.d("onFling: velocityX", pos.toString())
+                }
+                videoView.seekTo(pos)
+                return true
             }
-*/
+
             // Vertical Swipe
             if(e1.y - e2.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 left += 0.2F
