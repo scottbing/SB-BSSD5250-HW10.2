@@ -26,9 +26,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(ll)
 
         if (savedInstanceState == null) {
-            val path = "android.resource://$packageName/raw/undock"
+            val path1 = "android.resource://$packageName/raw/undock"
+            val path2 = "android.resource://$packageName/raw/small"
+
+            val paths: Array<String> =
+                arrayOf(
+                    path1,
+                    path2
+                )
+
             supportFragmentManager.commit {
-                replace(ll.id, VideoViewFragment.newInstance(path), VID_TAG)
+                replace(ll.id, VideoViewFragment.newInstance(paths), VID_TAG)
             }
         }else{
             val stepFragment = supportFragmentManager.findFragmentByTag(VID_TAG) as VideoViewFragment
