@@ -1,7 +1,6 @@
 package edu.nmhu.bssd5250.videoview
 
-import android.content.Context
-import android.media.AudioManager
+import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
@@ -9,10 +8,12 @@ import android.view.*
 import android.widget.VideoView
 import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.Fragment
-import kotlinx.coroutines.NonCancellable.start
+import kotlin.math.abs
 
 
 private const val VIDEO_PATH = "video_path"
+private const val SWIPE_MIN_DISTANCE = 120
+private const val SWIPE_THRESHOLD_VELOCITY = 200
 
 class VideoViewFragment : Fragment() {
 
@@ -39,6 +40,7 @@ class VideoViewFragment : Fragment() {
             setVideoPath(videoPath?.get(videoIndex))
             start()
             setOnTouchListener(object : View.OnTouchListener {
+                @SuppressLint("ClickableViewAccessibility")
                 override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
                     mDetector.onTouchEvent(p1)
                     return true
@@ -55,8 +57,6 @@ class VideoViewFragment : Fragment() {
     }
 
     private inner class VideoGestureListener : GestureDetector.SimpleOnGestureListener() {
-
-        val audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         override fun onDoubleTap(e: MotionEvent?): Boolean {
             Log.d("Double Tap", "Double Tap")
@@ -75,41 +75,35 @@ class VideoViewFragment : Fragment() {
         }
 
         override fun onFling(
-            event1: MotionEvent, event2: MotionEvent,
+            e1: MotionEvent, e2: MotionEvent,
             velocityX: Float, velocityY: Float
         ): Boolean {
+            var left = 0.5F
+            var right = 0.5F
+            val amt = 20000
             var pos = videoView.currentPosition
 
-            // horizontal swipe
-            if(velocityX < 0) {
-                val amt = 20000
+            //taken from: https://stackoverflow.com/questions/4098198/adding-fling-gesture-to-an-image-view-android
+            // Horizontal Swipe
+            if(e1.x - e2.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 pos -= amt
-                if(pos < 0) {
-                    pos = 0
-                } else {
-                    pos += amt
-                    Log.d("onFling: velocityX", pos.toString())
-                }
-                videoView.seekTo(pos)
-                return true
+                return false // Right to left
+            }  else if (e2.x - e1.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                pos += amt
+                return false // Left to right
             }
 
-            // up down
-            if(velocityY < 0) {
-                 videosMP?.setVolume(0.5F,0.5F)
-                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, 0)
-                val amt = 20000
-                pos -= amt
-
-                if(pos < 0) {
-                    pos = 0
-                } else {
-                    pos += amt
-                    audioManager.adjustVolume(AudioManager.ADJUST_LOWER, 0)
-                    Log.d("onFling: velocityY", pos.toString())
-                }
-                videoView.seekTo(pos)
-                return true
+            // Vertical Swipe
+            if(e1.y - e2.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                left += 0.2F
+                right += 0.2F
+                videosMP?.setVolume(left, right)
+                return false // Bottom to top
+            }  else if (e2.y - e1.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                left -= 0.2F
+                right -= 0.2F
+                videosMP?.setVolume(left, right)
+                return false // Top to bottom
             }
             return true
         }
