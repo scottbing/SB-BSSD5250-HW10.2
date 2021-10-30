@@ -71,6 +71,7 @@ class VideoViewFragment : Fragment() {
         override fun onLongPress(e: MotionEvent?) {
             super.onLongPress(e)
             videoIndex = if (videoIndex == 0 ) 1 else 0 //flip videos
+            videoView.setVideoPath(videoPath?.get(videoIndex))
             Log.d("Long Press", videoIndex.toString())
         }
 
@@ -80,10 +81,22 @@ class VideoViewFragment : Fragment() {
         ): Boolean {
             var left = 0.5F
             var right = 0.5F
-            val amt = 20000
+            val amt = 10000
             var pos = videoView.currentPosition
 
-            //taken from: https://stackoverflow.com/questions/4098198/adding-fling-gesture-to-an-image-view-android
+            // horizontal swipe
+            if(velocityX < 0) {
+                pos -= amt
+                if(pos < 0) {
+                    pos = 0
+                } else {
+                    pos += amt
+                    Log.d("onFling: velocityX", pos.toString())
+                }
+                videoView.seekTo(pos)
+                return true
+            }
+            /*//taken from: https://stackoverflow.com/questions/4098198/adding-fling-gesture-to-an-image-view-android
             // Horizontal Swipe
             if(e1.x - e2.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 pos -= amt
@@ -92,7 +105,7 @@ class VideoViewFragment : Fragment() {
                 pos += amt
                 return false // Left to right
             }
-
+*/
             // Vertical Swipe
             if(e1.y - e2.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 left += 0.2F
